@@ -1,0 +1,49 @@
+
+.center{
+	margin: auto;
+	float: center;
+	font-size: 12pt;
+	color: white;
+}
+
+.gameover{
+	color: red;
+	margin: auto;
+ 	width: 50%;
+ 	float: center;
+  	font-size: 16pt;
+}
+
+.wrapper {
+  margin: auto;
+  width: min-content;
+  height: min-content;
+  float: center;
+  display: flex;
+}
+
+.canvas {
+  margin: auto;
+  width: min-content;
+  height: min-content;
+  float: left;
+  padding: 10px;
+  border-radius: 30px;
+  box-shadow: 7px 4px 15px 1px #3090d6;
+  background: #ffffff url(bitmaps/background.bmp) no-repeat center center;
+  background-size: cover;
+}
+
+.options {
+  margin: auto;
+  width: min-content;
+  height: min-content;
+  float: center;
+  padding: 5px;
+  border: 2px solid #000000;
+  border-radius: 7px;
+  box-shadow: 7px 4px 15px 1px #3090d6;
+  position: fixed;
+  top:50%;
+  right:45%;
+}

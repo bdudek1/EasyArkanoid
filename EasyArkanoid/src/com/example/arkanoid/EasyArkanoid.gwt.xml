@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.9.0//EN"
+  "C:/Program Files/gwt-2.9.0/gwt-2.9.0/gwt-module.dtd">
+  <!-- Uzylem sciezki do fizycznego pliku, poniewaz link do strony gwt generowal problemy -->
+  
+<module rename-to='easyarkanoid'>
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+  <inherits name="com.google.gwt.logging.Logging"/>
+  
+  <entry-point class='com.example.arkanoid.client.EasyArkanoid'/>
+  <source path='client'/>
+  
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
+
+  <add-linker name="xsiframe"/>
+</module>
