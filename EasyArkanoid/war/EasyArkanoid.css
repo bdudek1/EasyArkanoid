@@ -30,7 +30,7 @@
   padding: 10px;
   border-radius: 30px;
   box-shadow: 7px 4px 15px 1px #3090d6;
-  background: #ffffff url(bitmaps/background.bmp) no-repeat center center;
+  background: #ffffff url(background.bmp) no-repeat center center;
   background-size: cover;
 }
 

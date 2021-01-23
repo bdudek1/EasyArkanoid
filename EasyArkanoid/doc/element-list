@@ -1,0 +1,6 @@
+com.example.arkanoid
+com.example.arkanoid.client
+com.example.arkanoid.client.config
+com.example.arkanoid.client.sprites
+com.example.arkanoid.client.util
+com.example.arkanoid.client.util.input

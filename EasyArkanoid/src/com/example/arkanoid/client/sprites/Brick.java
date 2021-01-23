@@ -9,27 +9,30 @@ public final class Brick extends Sprite {
 	private byte durability;
 	
 	public Brick(Image bitmap, double xPosition, double yPosition) {
-		super(bitmap, xPosition, yPosition);
+		this(bitmap, xPosition, yPosition, (byte)1);
 	}
 	
 	public Brick(Image bitmap, double xPosition, double yPosition, byte durability) {
 		super(bitmap, xPosition, yPosition);
-		if(durability > 0 &&  durability < 4) {this.durability = durability;}
-		else {throw new IllegalArgumentException("Wytrzymalosc cegielki musi byc " + 
-												 "wieksza od 0 i mniejsza od 4!");}
+		if(durability > 0 &&  durability < 4) {
+			this.durability = durability;
+		}else{
+			throw new IllegalArgumentException("Wytrzymalosc cegielki musi byc " + 
+												 "wieksza od 0 i mniejsza od 4!");
+		}
 	}
 	
 	public void getHitByBall(Set<Brick> brickSet) {
 		durability--;
 		switch(durability) {
-		case 2:
-			setBitmap(Configuration.BLUE_BRICK_BITMAP);
-			break;
-		case 1:
-			setBitmap(Configuration.YELLOW_BRICK_BITMAP);
-			break;
-		default:
-			removeBrick(brickSet);
+			case 2:
+				setBitmap(Configuration.getBlueBrickBitmap());
+				break;
+			case 1:
+				setBitmap(Configuration.getYellowBrickBitmap());
+				break;
+			default:
+				removeBrick(brickSet);
 		}
 	}
 	
@@ -39,8 +42,9 @@ public final class Brick extends Sprite {
 	
 	@Override
 	public boolean equals(Object o) {
-		if(getClass()!=o.getClass())
+		if(getClass()!=o.getClass()) {
 			return false;
+		}
 		
 		Brick brick = (Brick)o;
 		if(getX() == brick.getX() && getY() == brick.getY()) {

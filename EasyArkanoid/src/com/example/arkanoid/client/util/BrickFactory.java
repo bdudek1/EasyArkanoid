@@ -9,22 +9,22 @@ public final class BrickFactory {
 	//rowNumber - w ktorym "wierszu" jest cegla, a columnNumber to kolumna
 	public static Brick getBrick(int rowNumber, int columnNumber, byte durability,
 								int startXPosition, int startYPosition) {
-		int brickWidth = Configuration.BRICK_WIDTH;
-		int brickHeight = Configuration.BRICK_HEIGHT;
+		int brickWidth = Configuration.getBrickWidth();
+		int brickHeight = Configuration.getBrickHeight();
 		
 		switch(durability) {
 		case 3:
-			return new Brick(Configuration.RED_BRICK_BITMAP,
+			return new Brick(Configuration.getRedBrickBitmap(),
 							 brickWidth*columnNumber + startXPosition,
 							 brickHeight*rowNumber + startYPosition,
 							 durability);
 		case 2:
-			return new Brick(Configuration.BLUE_BRICK_BITMAP,
+			return new Brick(Configuration.getBlueBrickBitmap(),
 							 brickWidth*columnNumber + startXPosition,
 							 brickHeight*rowNumber + startYPosition,
 							 durability);
 		case 1:
-			return new Brick(Configuration.YELLOW_BRICK_BITMAP,
+			return new Brick(Configuration.getYellowBrickBitmap(),
 							 brickWidth*columnNumber + startXPosition,
 							 brickHeight*rowNumber + startYPosition,
 							 durability);

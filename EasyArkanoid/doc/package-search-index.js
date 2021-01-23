@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.example.arkanoid.client"},{"l":"com.example.arkanoid.client.config"},{"l":"com.example.arkanoid.client.sprites"},{"l":"com.example.arkanoid.client.util"},{"l":"com.example.arkanoid.client.util.input"}]

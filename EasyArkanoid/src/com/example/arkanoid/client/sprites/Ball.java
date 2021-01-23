@@ -15,7 +15,7 @@ public final class Ball extends MoveableSprite {
 	
 	public boolean checkIfIsInsideCanvas() {
 		//odbijanie pilki od scianek
-		if(getX() < 0 || getX() > Configuration.CANVAS_WIDTH-Configuration.BALL_DIAMETER) {
+		if(getX() < 0 || getX() > Configuration.CANVAS_WIDTH-Configuration.getBallDiameter()) {
 			SoundBoard.playWallCollisionSound();
 			collideHorizontally(); 
 		}
@@ -29,7 +29,6 @@ public final class Ball extends MoveableSprite {
 			return false;
 		}; 
 		return true;
-		
 	}
 	
 	public boolean doesCollideWith(Sprite sprite) {
@@ -49,8 +48,9 @@ public final class Ball extends MoveableSprite {
 		if( bottomEdge < spriteTopEdge ||
 			topEdge > spriteBottomEdge ||
 			rightEdge < spriteLeftEdge ||
-			leftEdge > spriteRightEdge)
+			leftEdge > spriteRightEdge) {
 			return false;
+		}
 		
 		if(sprite instanceof Paddle) {
 			//reakcja na kolizje pilki z paletka
@@ -64,27 +64,26 @@ public final class Ball extends MoveableSprite {
 			else if(leftEdge > spriteRightEdge-10 || rightEdge < spriteLeftEdge+10) {
 				collideHorizontally();
 			}
-			Configuration.log(Level.INFO, "Ball [" + getX() + ", " + getY() + "] collided with brick [" +
-					  sprite.getX() + ", " + sprite.getY() +"]");
+			Configuration.log(Level.INFO, "Ball [" + getX() + ", " + getY() + 
+						     "] collided with brick [" + sprite.getX() + ", " + sprite.getY() +"]");
 		}
 		return true;
-
 	}
 	
 	private void collideVertically() {
-		setYVelocity(-getYVelocity());
+		setYvelocity(-getYvelocity());
 	}
 	
 	private void collideHorizontally() {
-		setXVelocity(-getXVelocity());
+		setXvelocity(-getXvelocity());
 	}
 	
 	private void collideWithPaddle(Paddle paddle) {
 		collideVertically();
-		setXVelocity(-getYVelocity()*calculateBounceXVelocityModifier(paddle));
+		setXvelocity(-getYvelocity()*calculateBounceXvelocityModifier(paddle));
 		SoundBoard.playPaddleCollisionSound();
-		Configuration.log(Level.INFO, "Ball [" + getX() + ", " + getY() + "] collided with paddle [" +
-						  paddle.getX() + ", " + paddle.getY() +"]");
+		Configuration.log(Level.INFO, "Ball [" + getX() + ", " + getY() + 
+						 "] collided with paddle [" + paddle.getX() + ", " + paddle.getY() +"]");
 	}
 	
 	//metoda potrzebna, by w glownym watku po spadnieciu pilki tylko raz odjeto zycie
@@ -92,16 +91,16 @@ public final class Ball extends MoveableSprite {
 	public void hide() {
 		isHidden = true;
 		setY(-50);
-		setXVelocity(0);
-		setYVelocity(0);
+		setXvelocity(0);
+		setYvelocity(0);
 	}
 	
 	//obliczanie wartosci, przez ktora nalezy przemnozyc predkosc x-owa pilki
 	//by odbijala sie pod katem od 0 do 60 stopni
-	private double calculateBounceXVelocityModifier(Paddle paddle) {
-		double halfOfPaddleWidth = Configuration.PADDLE_WIDTH/2;
-		double xDistanceToPaddle = getX() + Configuration.BALL_DIAMETER/2 -
-							 	   (paddle.getX() + Configuration.PADDLE_WIDTH/2);
+	private double calculateBounceXvelocityModifier(Paddle paddle) {
+		double halfOfPaddleWidth = Configuration.getPaddleWidth()/2;
+		double xDistanceToPaddle = getX() + Configuration.getBallDiameter()/2 -
+							 	   (paddle.getX() + Configuration.getPaddleWidth()/2);
 		double sin60Value = Math.sqrt(3)/2;
 		return xDistanceToPaddle/halfOfPaddleWidth*sin60Value;
 	}

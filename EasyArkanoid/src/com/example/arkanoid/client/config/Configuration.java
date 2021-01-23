@@ -3,7 +3,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.example.arkanoid.client.util.GameThread;
+import com.example.arkanoid.client.util.ResourcesLoadingException;
+import com.example.arkanoid.client.util.input.InputProcessor;
+import com.example.arkanoid.client.util.input.KeyEvent;
+import com.example.arkanoid.client.util.input.KeyType;
+import com.example.arkanoid.client.util.input.KeyboardInput;
+import com.example.arkanoid.client.util.input.MouseInput;
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -14,6 +21,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -21,49 +29,46 @@ public final class Configuration {
 	
 	private static final Logger LOGGER = Logger.getLogger("");
 	
-	public static final Image PADDLE_BITMAP = new Image("bitmaps/paddle.bmp");
-	public static final Image BALL_BITMAP = new Image("bitmaps/ball.bmp");
-	public static final Image BLUE_BRICK_BITMAP = new Image("bitmaps/brickblue.bmp");
-	public static final Image RED_BRICK_BITMAP = new Image("bitmaps/brickred.bmp");
-	public static final Image YELLOW_BRICK_BITMAP = new Image("bitmaps/brickyellow.bmp");
+	private static Image paddleBitmap;
+	private static Image ballBitmap;
+	private static Image blueBrickBitmap;
+	private static Image redBrickBitmap;
+	private static Image yellowBrickBitmap;
 	
-	//z nieznanego mi powodu ponizsze pobieranie wartosci dziala mi jedynie w
-	//development mode
-//	public static final int BALL_DIAMETER = BALL_BITMAP.getHeight();
-//	public static final int PADDLE_HEIGHT = PADDLE_BITMAP.getHeight();
-//	public static final int PADDLE_WIDTH = PADDLE_BITMAP.getWidth();
-//	public static final int BRICK_HEIGHT = BLUE_BRICK_BITMAP.getHeight();
-//	public static final int BRICK_WIDTH = BLUE_BRICK_BITMAP.getWidth();
+	private static int ballDiameter;
+	private static int paddleHeight;
+	private static int paddleWidth;
+	private static int brickHeight;
+	private static int brickWidth;
 	
-	//by gra dzialala po normalnej kompilacji musze wprowadzic wartosci
-	//w ten sposob
-	public static final int BALL_DIAMETER = 16;
-	public static final int PADDLE_HEIGHT = 12;
-	public static final int PADDLE_WIDTH = 96;
-	public static final int BRICK_HEIGHT = 16;
-	public static final int BRICK_WIDTH = 32;
-	
-	//co ile ms ma byc wykonywana glowna petla gry
-	public static final int UPDATE_RATE = 16;
-	
-	public static final double BASE_BALL_SPEED = 2.0;
-	public static final double BASE_PADDLE_SPEED = 8.0;
+	public static final double BASE_BALL_SPEED = 1.5;
+	public static final double BASE_PADDLE_SPEED = 5.0;
 	
 	//5min na rozegranie poziomu, czas w [ms]
 	public static final int LEVEL_TIMEOUT = 300000;
+	
+	//czas jednego tiku wynikajacy z natury funkcji
+	//AnimationScheduler.get().requestAnimationFrame(this), ktora wywoluje rekurencyjnie
+	//callback w takej samej czestotliwosci, jaka czestotliwosc ma uzywany monitor w [Hz],
+	//moj monitor ma 120Hz, ale inne maja np. 60Hz, 144Hz, szukalem caly dzien mozliwosci pobrania
+	//wartosci czestotliwosci monitora ale, ze GWT nie moze zaimportowac Javowskiej biblioteki
+	//java.awt.*, nie znalazlem
+	//wartosc jest ustawiona na 1000/120[Hz], poniewaz jednostka Hz jest 1/s, wiec kiedy
+	//wartosc bezjednostkowa 1000 podzielimy przez 1/s, otrzymamy wartosc w sekundach, a mnozymy
+	//razy 1000, by otrzymac milisekundy
+	public static final int MS_PER_UPDATE = 1000/120; //[ms]
 	
 	public static final String CANVAS_HOLDER_ID = "canvas";
 	public static final int CANVAS_WIDTH = 400;
 	public static final int CANVAS_HEIGHT = 600;
 	public static final String CANVAS_NOT_SUPPORTED_WARNING =
 			"Your browser does not support HTML5 Canvas";
+	public static final String FILES_PATH = GWT.getModuleBaseForStaticFiles();
 	
 	private static int level = 1;
 	private static double ballSpeedAdjustment = 1;
-	private static int BRICK_ROWS_NUMBER;
-	private static int BRICK_COLUMNS_NUMBER;
-	private static boolean isMouseDown = false;
-	public static boolean SOUND_ENABLED = true;
+	private static byte brickRowsNumber;
+	private static byte brickColumnsNumber;
 	
 	//ustalanie poziomu trudnosci gry, co za tym idzie predkosci pilki
 	public static void setLevel(int setLevel) {
@@ -75,16 +80,62 @@ public final class Configuration {
 		}
 	}
 	
-	public static double getBallSpeedAdjustment() {return ballSpeedAdjustment;}
+	public static double getBallSpeedAdjustment() {
+		return ballSpeedAdjustment;
+	}
 	
-	public static int getBrickRowsNumber() {return BRICK_ROWS_NUMBER;}
+	public static byte getBrickRowsNumber() {
+		return brickRowsNumber;
+	}
 	
-	public static int getBrickColumnsNumber() {return BRICK_COLUMNS_NUMBER;}
+	public static byte getBrickColumnsNumber() {
+		return brickColumnsNumber;
+	}
+	
+	public static Image getPaddleBitmap() {
+		return paddleBitmap;
+	}
+	
+	public static Image getBallBitmap() {
+		return ballBitmap;
+	}
+	
+	public static Image getBlueBrickBitmap() {
+		return blueBrickBitmap;
+	}
+	
+	public static Image getYellowBrickBitmap() {
+		return yellowBrickBitmap;
+	}
+	
+	public static Image getRedBrickBitmap() {
+		return redBrickBitmap;
+	}
+	
+	public static int getBallDiameter() {
+		return ballDiameter;
+	}
+	
+	public static int getPaddleWidth() {
+		return paddleWidth;
+	}
+	
+	public static int getPaddleHeight() {
+		return paddleHeight;
+	}
+	
+	public static int getBrickWidth() {
+		return brickWidth;
+	}
+	
+	public static int getBrickHeight() {
+		return brickHeight;
+	}
 	
 	//ustalanie liczby wierszy cegiel, musi byc wieksza od 0 i mniejsza od 9
-	public static void setBrickRowsNumber(int brickRowsNumber) {
-		if(brickRowsNumber > 0 && brickRowsNumber < 9) {
-					BRICK_ROWS_NUMBER = brickRowsNumber;
+	public static void setBrickRowsNumber(byte brickRows) {
+		if(brickRows > 0 && brickRows < 9) {
+				brickRowsNumber = brickRows;
 		}else {
 			log(Level.SEVERE, "Nieprawidlowa liczba wierszy cegiel!");
 			throw new IllegalArgumentException("Nieprawidlowa liczba wierszy cegiel!");
@@ -92,9 +143,9 @@ public final class Configuration {
 	}
 	
 	//ustalanie liczby kolumn cegiel, musi byc wieksza od 0 i mniejsza od 9
-	public static void setBrickColumnsNumber(int brickColumnsNumber) {
-		if(brickColumnsNumber > 0 && brickColumnsNumber < 9) {
-			BRICK_COLUMNS_NUMBER = brickColumnsNumber;
+	public static void setBrickColumnsNumber(byte brickColumns) {
+		if(brickColumns > 0 && brickColumns < 9) {
+			brickColumnsNumber = brickColumns;
 		}else {
 			log(Level.SEVERE, "Nieprawidlowa liczba kolumn cegiel!");
 			throw new IllegalArgumentException("Nieprawidlowa liczba kolumn cegiel!");
@@ -114,37 +165,50 @@ public final class Configuration {
 			canvas.addKeyDownHandler(new KeyDownHandler(){
 			    @Override
 			    public void onKeyDown(KeyDownEvent event) {
-			    	if(event.isRightArrow()) game.getPaddle().setXVelocity(5);
-			        if(event.isLeftArrow())	 game.getPaddle().setXVelocity(-5);
+			    	if(event.isRightArrow()) {
+			    		InputProcessor.addInputToQueue(
+			    				new KeyboardInput(KeyType.ARROW_RIGHT, KeyEvent.DOWN,
+			    								  System.currentTimeMillis()));
+			    	}else if(event.isLeftArrow()) {
+			    		InputProcessor.addInputToQueue(
+								new KeyboardInput(KeyType.ARROW_LEFT, KeyEvent.DOWN,
+												  System.currentTimeMillis()));
+			    	}
 			    }
 			});
 			canvas.addKeyUpHandler(new KeyUpHandler() {
 				@Override
 				public void onKeyUp(KeyUpEvent event) {
-					if(event.isRightArrow() || event.isLeftArrow()) {
-						game.getPaddle().setXVelocity(0);
+					if(event.isRightArrow()) {
+						InputProcessor.addInputToQueue(
+							new KeyboardInput(KeyType.ARROW_RIGHT, KeyEvent.UP,
+											  System.currentTimeMillis()));
+					}else if(event.isLeftArrow()) {
+						InputProcessor.addInputToQueue(
+							new KeyboardInput(KeyType.ARROW_LEFT, KeyEvent.UP,
+											  System.currentTimeMillis()));
 					}
 				}
 			});
 			canvas.addMouseDownHandler(new MouseDownHandler() {
 				@Override
 				public void onMouseDown(MouseDownEvent event) {
-					game.getPaddle().setX(event.getX());
-					isMouseDown = true;
+					InputProcessor.addInputToQueue(
+						new MouseInput(KeyEvent.DOWN, System.currentTimeMillis(), event.getX()));
 				}
 			});
 			canvas.addMouseUpHandler(new MouseUpHandler(){
 				@Override
 				public void onMouseUp(MouseUpEvent event) {
-					isMouseDown = false;
+					InputProcessor.addInputToQueue(
+						new MouseInput(KeyEvent.UP, System.currentTimeMillis()));
 				}
 			});
 			canvas.addMouseMoveHandler(new MouseMoveHandler() {
 				@Override
 				public void onMouseMove(MouseMoveEvent event) {
-					if(isMouseDown && event.getX() - Configuration.PADDLE_WIDTH/2 > 0
-							 	   && event.getX() + Configuration.PADDLE_WIDTH/2 < Configuration.CANVAS_WIDTH)
-					game.getPaddle().setX(event.getX()-Configuration.PADDLE_WIDTH/2);
+					InputProcessor.addInputToQueue(
+						new MouseInput(KeyEvent.MOVE, System.currentTimeMillis(), event.getX()));
 				}
 			});
 			RootPanel.get(Configuration.CANVAS_HOLDER_ID).add(canvas);
@@ -152,5 +216,41 @@ public final class Configuration {
 	 
 	 public static void log(Level level, String string){
 		 LOGGER.log(level, string);
+	 }
+	 
+	 //jako, ze GWT nie wspiera wielowatkowosci Javy, w tym CompletableFuture<T> nie znalazlem
+	 //lepszego sposobu na zaladowanie i pobranie wartosci wymiarow bitmap, funkcja co 100ms
+	 //sprawdza, czy udalo sie zaladowac bitmapy, ktorych ladowanie rozpoczyna sie na poczatku
+	 //funkcji, przewidziane jest 10 prob, po czym funkcja uznaje, ze nie udalo sie zaladowac
+	 //bitmap, sytuacja jest identyczna w analogicznej funkcji w klasie SoundBoard przy
+	 //ladowaniu dzwiekow
+	 public static void loadBitmaps() {
+      	paddleBitmap = new Image(FILES_PATH + "bitmaps/paddle.bmp");
+      	ballBitmap = new Image(FILES_PATH + "bitmaps/ball.bmp");
+      	blueBrickBitmap = new Image(FILES_PATH + "bitmaps/brickblue.bmp");
+      	redBrickBitmap = new Image(FILES_PATH + "bitmaps/brickred.bmp");
+      	yellowBrickBitmap = new Image(FILES_PATH + "bitmaps/brickyellow.bmp");
+		Timer t = new Timer() {
+			byte i = 0;
+		    @Override
+		    public void run() {
+		    	if(yellowBrickBitmap == null && i < 10) {
+		    		i++;
+		    	}else if(yellowBrickBitmap != null) {
+		        	ballDiameter = ballBitmap.getHeight();
+		        	paddleHeight = paddleBitmap.getHeight();
+		        	paddleWidth = paddleBitmap.getWidth();
+		        	brickHeight = yellowBrickBitmap.getHeight();
+		        	brickWidth = yellowBrickBitmap.getWidth();
+		        	log(Level.INFO, "Zaladowano bitmapy.");
+		        	cancel();
+		    	}else if(i > 9) {
+		        	log(Level.SEVERE, "Nie udalo sie zaladowac bitmap.");
+		        	cancel();
+		        	throw new ResourcesLoadingException("Nie udalo sie zaladowac bitmap.");
+		    	}
+		    }
+		}; 
+		t.scheduleRepeating(100);
 	 }
 }

@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import com.example.arkanoid.client.config.Configuration;
 import com.google.gwt.media.client.Audio;
+import com.google.gwt.user.client.Timer;
 
 //klasa jest idealnym kandydatem na bycie klasa typu Aspect
 //z metodami Advice, ale z powodu wymogu uzycia jedynie Java + GWT 
@@ -17,72 +18,90 @@ public final class SoundBoard {
 	private static Audio loseLifeSound;
 	private static Audio winSound;
 	
-	public static void initializeSounds() {
-		try {
-			paddleCollisionSound = Audio.createIfSupported();
-			paddleCollisionSound.setSrc("sounds/paddle_collision.flac");
+	private static boolean isSoundEnabled;
+	
+	public static void loadSounds(){
+		paddleCollisionSound = Audio.createIfSupported();
+		paddleCollisionSound.setSrc(Configuration.FILES_PATH + "sounds/paddle_collision.flac");
 			
-			startSound = Audio.createIfSupported();
-			startSound.setSrc("sounds/start.mp3");
+		startSound = Audio.createIfSupported();
+		startSound.setSrc(Configuration.FILES_PATH + "sounds/start.mp3");
 			
-			loseSound = Audio.createIfSupported();
-			loseSound.setSrc("sounds/lose.wav");
+		loseSound = Audio.createIfSupported();
+		loseSound.setSrc(Configuration.FILES_PATH + "sounds/lose.wav");
 			
-			loseLifeSound = Audio.createIfSupported();
-			loseLifeSound.setSrc("sounds/lose_life.wav");
+		loseLifeSound = Audio.createIfSupported();
+		loseLifeSound.setSrc(Configuration.FILES_PATH + "sounds/lose_life.wav");
 			
-			winSound = Audio.createIfSupported();
-			winSound.setSrc("sounds/win.wav");
-			
-		  	Configuration.SOUND_ENABLED = true;
-		}catch(NullPointerException e) {
-		    Configuration.SOUND_ENABLED = false;
-		    Configuration.log(Level.WARNING, "Sound not supported");
-		    e.printStackTrace();
-		}
+		winSound = Audio.createIfSupported();
+		winSound.setSrc(Configuration.FILES_PATH + "sounds/win.wav");
+		Timer t = new Timer() {
+			byte i = 0;
+		    @Override
+		    public void run() {
+		    	if(winSound == null && i < 10) {
+		    		i++;
+		    	}else if(winSound != null) {
+			        Configuration.log(Level.INFO, "Zaladowano dzwieki.");
+			        isSoundEnabled = true;
+			        cancel();
+		    	}else if(i > 9) {
+			    	Configuration.log(Level.WARNING, "Nie udalo sie zaladowac dzwiekow.");
+			        isSoundEnabled = false;
+			        cancel();
+			        throw new ResourcesLoadingException("Nie udalo sie zaladowac dzwiekow.");
+		    	}
+		    }
+		}; 
+		t.scheduleRepeating(100);
 	}
 	
 	public static void playPaddleCollisionSound() {
-		if(Configuration.SOUND_ENABLED)
-		paddleCollisionSound.play();
+		if(isSoundEnabled) {
+			paddleCollisionSound.play();
+		}
 	}
 	
 	//tworzone sa nowe obiekty tego dzwieku, by kilka kolizji w krotkim czasie 
 	//byly odpowiednio reprezentowane dzwiekowo
 	public static void playBrickCollisionSound() {
-		if(Configuration.SOUND_ENABLED) {
+		if(isSoundEnabled) {
 			brickCollisionSound = Audio.createIfSupported();
-			brickCollisionSound.setSrc("sounds/brick_collision.wav");
+			brickCollisionSound.setSrc(Configuration.FILES_PATH + "sounds/brick_collision.wav");
 			brickCollisionSound.play();
 		}
 	}
 	
 	//jak wyzej
 	public static void playWallCollisionSound() {
-		if(Configuration.SOUND_ENABLED) {
+		if(isSoundEnabled) {
 			wallCollisionSound = Audio.createIfSupported();
-			wallCollisionSound.setSrc("sounds/wall_collision.wav");
+			wallCollisionSound.setSrc(Configuration.FILES_PATH + "sounds/wall_collision.wav");
 			wallCollisionSound.play();
 		}
 	}
 	
 	public static void playStartSound() {
-		if(Configuration.SOUND_ENABLED)
-		startSound.play();
+		if(isSoundEnabled) {
+			startSound.play();
+		}
 	}
 	
 	public static void playLoseSound() {
-		if(Configuration.SOUND_ENABLED)
-		loseSound.play();
+		if(isSoundEnabled) {
+			loseSound.play();
+		}
 	}
 	
 	public static void playWinSound() {
-		if(Configuration.SOUND_ENABLED)
-		winSound.play();
+		if(isSoundEnabled) {
+			winSound.play();
+		}
 	}
 	
 	public static void playLoseLifeSound() {
-		if(Configuration.SOUND_ENABLED)
-		loseLifeSound.play();
+		if(isSoundEnabled) {
+			loseLifeSound.play();
+		}
 	}
 }

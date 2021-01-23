@@ -21,9 +21,11 @@ public class EasyArkanoid implements EntryPoint {
 	 private ListBox columnsNumber;
 	 private Button startButton;
 	 
+	 @Override
 	 public void onModuleLoad() {	 
 		  canvas = UICreator.createCanvas();
-		  SoundBoard.initializeSounds();
+		  SoundBoard.loadSounds();
+		  Configuration.loadBitmaps();
 		  configureStartButton();
 		  levelSelect = UICreator.createLevelSelector();
 		  rowsNumber = UICreator.createRowsNumberSelector();
@@ -32,23 +34,22 @@ public class EasyArkanoid implements EntryPoint {
 	 }
 	 
 	 private void configureStartButton() {
-		    startButton = new Button("Start game", new ClickHandler() {
-		        public void onClick(ClickEvent event) {
-		        	if(game == null || game.getGameState()!=GameState.RUNNING) {
+		  startButton = new Button("Start game", new ClickHandler() {
+		      public void onClick(ClickEvent event) {
+		    	  if(game == null || game.getGameState()!=GameState.RUNNING) {
 		        		game = new GameThread(canvas);
 				        Configuration.configureCanvasAndControls(canvas, game);
 				        Configuration.setLevel(Integer.valueOf(levelSelect.getSelectedValue()));
 				        Configuration.setBrickRowsNumber(
-				        		Integer.valueOf(rowsNumber.getSelectedValue()));
+				        		Byte.valueOf(rowsNumber.getSelectedValue()));
 				        Configuration.setBrickColumnsNumber(
-				        		Integer.valueOf(columnsNumber.getSelectedValue()));
+				        		Byte.valueOf(columnsNumber.getSelectedValue()));
 				        UICreator.hideMenu();
 				  	  	game.startGame();
-		        	}
-		        }
-		      });
-		    UICreator.setStartButton(startButton);
-		    RootPanel.get(Configuration.CANVAS_HOLDER_ID).get("start").add(startButton);
+		    	  }
+		      }
+		  });
+		  UICreator.setStartButton(startButton);
+		  RootPanel.get(Configuration.CANVAS_HOLDER_ID).get("start").add(startButton);
 	 }
-	 
 }
